@@ -49,7 +49,7 @@ router.get('/authorize',WarrantToken, (req,res)=>{
         delete data["exp"];
         delete data["Password"];
         var newtoken = gjwtToken(data,keywrd);
-      res.sendStatus(200).json(newtoken);
+      res.sendStatus(200).json(newtoken); 
       
     }
   })
