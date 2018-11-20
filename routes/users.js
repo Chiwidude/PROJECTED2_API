@@ -11,7 +11,7 @@ const jwebtoken = require('jsonwebtoken');
 const dbname = 'ProyectoED2';
 const cllname = 'Users';
 const secretPass = "keypass";
-const keywrd = "Apikey"
+const keywrd = "Apikey";
 /* GET users listing. */
 /* Inserting users to db*/
 router.post('/signup', function(req, res, next){ 
