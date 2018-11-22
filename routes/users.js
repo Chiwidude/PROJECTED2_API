@@ -40,6 +40,37 @@ router.post('/signup', function(req, res, next){
         })
 });
 });
+router.get('/all',WarrantToken,(req,res)=>{
+  jwebtoken.verify(req.token,keywrd,(err,data)=>{
+    if(err){
+      res.sendStatus(403);
+    }else{
+      delete data["iat"];
+      delete data["exp"];
+      mongoclient.connect(url,{useNewUrlParser:true},(err,client)=>{
+        if(err) return next(createError(500))
+        const database = client.db(dbname)
+        const collection = database.collection(cllname);
+        collection.find({}).toArray((err,jdocs)=>{
+          if(err) return next(createError(500))
+          jdocs.forEach(function(user){
+            delete user["Password"]
+            delete user["Name"]
+            delete user["LastName"]
+            delete user["Email"]
+            delete user["_id"]
+          })
+          const ntoken = gjwtToken(data,keywrd);
+          res.setHeader('authorization',ntoken)
+          res.status(200).json(jdocs).end();
+          
+        })
+      })      
+      
+    }
+  })
+})
+/*Obtiene lista de Usuarios*/
 router.get('/authorize',WarrantToken, (req,res)=>{
   jwebtoken.verify(req.token,keywrd,(err,data)=>{
     if(err) {
@@ -47,10 +78,9 @@ router.get('/authorize',WarrantToken, (req,res)=>{
     }else{
         delete data["iat"];
         delete data["exp"];
-        delete data["Password"];
         var newtoken = gjwtToken(data,keywrd);
-      res.sendStatus(200).json(newtoken); 
-      
+        res.setHeader('authorization',newtoken)
+        res.sendStatus(200).end();
     }
   })
   });
@@ -67,6 +97,7 @@ router.get('/authorize',WarrantToken, (req,res)=>{
               delete doc["Name"];
               delete doc["LastName"];
               delete doc["Password"];
+              delete doc["_id"]
               const token = gjwtToken(doc,keywrd);
               res.status(200).json(token).end();
             }else{
