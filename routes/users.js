@@ -111,7 +111,7 @@ router.get('/authorize',WarrantToken, (req,res)=>{
 function gjwtToken(jwt,kword){
   jwebt_simple.encode(jwt,kword);
   return token = jwebtoken.sign(jwt,kword,{
-      expiresIn: '30d'
+      expiresIn: '5m'
   })
 }
 /* validate if a token was sent */
