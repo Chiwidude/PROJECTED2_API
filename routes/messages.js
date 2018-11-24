@@ -86,11 +86,11 @@ router.put('/update',WarrantToken,(req,res)=>{
             if(err) return next(createError(500));
             const database = client.db(dbname)
             const collection = database.collection(cllname);
-            collection.findOneAndUpdate({participantes:conversation.participantes},req.body,function(err,res){
+            collection.updateOne({participantes:conversation.participantes},{$set:req.body},function(err,result){
                 if(err) return next(createError(500));
-                if(res){
+                if(result){
                         res.setHeader('authorization',newtoken);
-                        res.status().end()
+                        res.status(200).end()
                 }else{
                     res.status(404).end();
                 }
@@ -109,7 +109,7 @@ router.put('/update',WarrantToken,(req,res)=>{
                   if(err) return next(createError(500));
                   const database = client.db(dbname)
                   var username = data.Username;
-                  var part2 = req.headers["ouser"];
+                  var part2 = req.headers["user"];
                   const collection = database.collection(cllname);
                   var participantesv = [username,part2];
                   var participantesv2 = [part2,username];
@@ -118,14 +118,39 @@ router.put('/update',WarrantToken,(req,res)=>{
                   var newtoken = gjwtToken(data,keywrd);
                   collection.findOne({$or:[{participantes:participantesv},{participantes:participantesv2}]},function(err,doc){
                       if(err) next(createError(500))
-                      if(!doc){
+                      if(doc){
                           res.setHeader('authorization',newtoken);
-                          res.status(204).end();
-                      }else{
-                          res.setHeader('authorization',newtoken);
-                          res.status(409).json(doc).end();
+                          res.status(200).end();
                       }
                   });
+              })
+            }
+        })
+      });
+      router.get('/getAll',WarrantToken,(req,res)=>{
+        jwebtoken.verify(req.token,keywrd,(err,data)=>{
+            if(err){
+                res.Status(403);
+            }else{
+              mongoclient.connect(url,{useNewUrlParser:true},(err,client)=>{
+                  if(err) return next(createError(500));
+                  const database = client.db(dbname)
+                  var username = data.Username;
+                  const collection = database.collection(cllname);
+                  delete data["iat"];
+                  delete data["exp"];
+                  var newtoken = gjwtToken(data,keywrd);
+                  collection.find({}).toArray((err,jdocs)=>{
+                      if(err) return next(createError(500))
+                      jdocs.forEach(function(converse){
+                          if(!converse.participantes.includes(username)){
+                                delete converse
+                          }
+                      })
+                      res.setHeader('authorization',newtoken)
+                      res.status(200).json(jdocs).end();
+                  })
+                     
               })
             }
         })
