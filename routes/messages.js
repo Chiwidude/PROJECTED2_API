@@ -21,7 +21,8 @@ router.post('/addnew',WarrantToken,(req,res)=>{
         }else{
             var conversation = {
                 "participantes":req.body.participantes,
-                "mensajes": req.body.mensajes
+                "mensajes": req.body.mensajes,
+                "key": req.body.key
             }
             delete data["iat"]
             delete data["exp"]
@@ -77,7 +78,8 @@ router.put('/update',WarrantToken,(req,res)=>{
         }else{
             var conversation = {
                 "participantes":req.body.participantes,
-                "mensajes": req.body.mensajes
+                "mensajes": req.body.mensajes,
+                "key": req.body.key
             }
         delete data["iat"]
         delete data["exp"]
@@ -120,7 +122,7 @@ router.put('/update',WarrantToken,(req,res)=>{
                       if(err) next(createError(500))
                       if(doc){
                           res.setHeader('authorization',newtoken);
-                          res.status(200).end();
+                          res.status(200).json(doc).end();  
                       }
                   });
               })
